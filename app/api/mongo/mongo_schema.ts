@@ -24,6 +24,7 @@ const auth_schema = new mongoose.Schema({
 })
 
 const achievement_schema = new mongoose.Schema({
+    userId: {type: String, required: true},
     task: {type: String, required: true},
     date: {type: Date, default: Date.now()}
 })
