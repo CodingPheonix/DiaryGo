@@ -5,9 +5,7 @@ import { format, addDays, subDays, isAfter } from "date-fns";
 import { MdOutlineAdd } from "react-icons/md";
 import { useForm, SubmitHandler } from "react-hook-form"
 import { ToastContainer, toast } from 'react-toastify';
-import { sendMessage, uploadNewTask } from '../Components/APIs';
-import { fetchSession } from '../Utilities/actions/auth';
-import { v4 as UUIDv4 } from 'uuid';
+import { sendMessage, uploadNewTask, UploadToCalendar } from '../Components/APIs';
 import { useCurrentUser } from '../Components/CurrentUser';
 
 const Page = () => {
@@ -86,6 +84,15 @@ const Page = () => {
       target: data.target,
       task_list: task_list
     })
+
+    const date = new Date();
+    const formattedDate = format(date, "yyyy-MM-dd").slice(0, 10);
+
+    await UploadToCalendar({
+      userId: currentUser as string,
+      date: formattedDate,
+      event: data.target
+    });
 
     console.log("response : ", response)
 

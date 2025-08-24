@@ -125,3 +125,44 @@ export async function fetchAllTargets(userId: string) {
         throw error;
     }
 }
+
+export async function UploadToCalendar(params: { userId: string; date: string; event: string }) {
+    try {
+        const response = await fetch(`/api/calendar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(params)
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to connect to API");
+        }
+
+        const result = await response.json();
+        return result;
+
+    } catch (error) {
+        console.error("Error in UploadToCalendar:", error);
+        throw error;
+    }
+}
+
+export async function GetCalendarEvents(params: { userId: string }) {
+    try {
+        const response = await fetch(`/api/calendar?userId=${params.userId}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to connect to API");
+        }
+
+        const result = await response.json();
+        return result;
+
+    } catch (error) {
+        console.error("Error in GetCalendarEvents:", error);
+        throw error;
+    }
+}
