@@ -17,6 +17,7 @@ def router(state: State):
 
         Available Nodes:
         - task_list_generator - Used to generate a task list - Example: "I want to create a task list."
+        - update_progress - Used to update the progress of tasks - Example: "I want to update the progress of my tasks."
         - end
 
         Generate only the name of the node, nothing else.
@@ -65,3 +66,48 @@ def task_list_generator(state: State):
 
     """
     return {"messages": [llm.invoke(prompt)]}
+
+def progress_updator(state: State):
+    prompt = f"""
+        You are an expert in tracking progress on tasks.
+        Your job consists of __ steps :
+        1. Read the input text from the user.
+        2. Fetch the present incomplete targets from other agents.
+        3. Summarize the progress made on each task.
+        4. Calculate a rough percentage of completion for each task.
+        5. Generate a report summarizing the overall progress.
+
+        ### Important:
+        - The following examples are ONLY for illustration.  
+        - Do **not** copy or reuse them.  
+        - Always base your output ONLY on the actual input text provided after "Input text:".  
+
+        Example 1:
+        input : "
+            I have completed the following tasks: i have watched 1 youtube videos for langchain and practiced it by making a project.
+        "
+        fetched data: "
+            target: Master Langchain and Langgraph
+            tasks: (name: watch 2 youtube videos on langchain, progress: 0), 
+                   (name: make 3 projects on langchain, progress: 0),
+                   (name: upload 3 posts on linkedIn, progress: 0)
+        "
+        output : (
+            target: Master Langchain and Langgraph
+            tasks: (name: watch 2 youtube videos on langchain, progress: 50), 
+                   (name: make 3 projects on langchain, progress: 33),
+                   (name: upload 3 posts on linkedIn, progress: 0)
+        )
+
+        User input is: {state["messages"]}
+    """
+    return {"messages": [llm.invoke(prompt)]}
+
+def database_manager(state: State):
+    prompt = f"""
+        You are an expert Database Manager. 
+        Your abilities are fetching and Updating databases.
+        You will:
+            Fetch from database:
+                - understand
+    """

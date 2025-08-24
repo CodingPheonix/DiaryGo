@@ -166,3 +166,25 @@ export async function GetCalendarEvents(params: { userId: string }) {
         throw error;
     }
 }
+
+export async function UploadAchievement(params: { userId: string, task: string, date: string }) {
+    try {
+        const response = await fetch(`/api/achievement`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(params)
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to connect to API");
+        }
+
+        const result = await response.json();
+        return result;
+
+    } catch (error) {
+        console.error("Error in UploadAchievement:", error);
+        throw error;
+    }
+
+}

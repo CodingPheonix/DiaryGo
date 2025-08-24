@@ -5,7 +5,7 @@ import { format, addDays, subDays, isAfter } from "date-fns";
 import { MdOutlineAdd } from "react-icons/md";
 import { useForm, SubmitHandler } from "react-hook-form"
 import { ToastContainer, toast } from 'react-toastify';
-import { sendMessage, uploadNewTask, UploadToCalendar } from '../Components/APIs';
+import { sendMessage, UploadAchievement, uploadNewTask, UploadToCalendar } from '../Components/APIs';
 import { useCurrentUser } from '../Components/CurrentUser';
 
 const Page = () => {
@@ -44,6 +44,7 @@ const Page = () => {
   const [isCreating, setIsCreating] = useState<Boolean>(false)
   const [isCreatingTarget, setIsCreatingTarget] = useState<Boolean>(false)
   const [isAddingAchievement, setIsAddingAchievement] = useState<Boolean>(false)
+  const [isSubmittingAchievement, setIsSubmittingAchievement] = useState<Boolean>(false)
   const [currentDate, setCurrentDate] = useState<Date>(today);
   const [daily_task_card_list, setDaily_task_card_list] = useState<TaskCard[]>([])
 
@@ -60,10 +61,31 @@ const Page = () => {
   };
 
   // Handle Achievement Submission Form
-  const onAchievementSubmit: SubmitHandler<OnAchievementSubmit> = (data) => {
-    console.log(data.target)
-    resetAchievement()
-    setIsAddingAchievement(false)
+  const onAchievementSubmit: SubmitHandler<OnAchievementSubmit> = async (data) => {
+    // console.log(data.target)
+    setIsSubmittingAchievement(true)
+
+    const prompt = `
+      You are given an achievement. Look for related targets and check which tasks are relevant. Update the progress.
+      Achievement: ${data.target}
+    `
+    const response = await sendMessage(prompt)   // Calculate the progress and other tasks through Agent
+
+    if (response.status === 200) {
+
+      // Upload achievement to current date
+      await UploadAchievement({
+        userId: currentUser as string,
+        task: data.target,
+        date: format(currentDate, "yyyy-MM-dd").slice(0, 10)
+      })
+
+      setIsSubmittingAchievement(false)
+      setIsAddingAchievement(false)
+      resetAchievement()
+    } else {
+      toast.error("Failed to add achievement")
+    }
   }
 
   // Handle Creating Target Form
@@ -76,27 +98,25 @@ const Page = () => {
       I need an array of tasks. like ["task1", "task2", "task3"] made of my given input.
     `
 
-    const task_list = await sendMessage(prompt)
+    const task_list = await sendMessage(prompt)   // get the list of tasks
     console.log(task_list)
 
-    const response = await uploadNewTask({
+    const response = await uploadNewTask({    // upload the target
       userId: currentUser as string,
       target: data.target,
       task_list: task_list
     })
 
     const date = new Date();
-    const formattedDate = format(date, "yyyy-MM-dd").slice(0, 10);
+    const formattedDate = format(date, "yyyy-MM-dd").slice(0, 10);    // get the current time
 
-    await UploadToCalendar({
+    await UploadToCalendar({    // add event to calendar
       userId: currentUser as string,
       date: formattedDate,
       event: data.target
     });
 
-    console.log("response : ", response)
-
-    if (response?.status === 200) {
+    if (response?.status === 200) {   // perform actions on success
       toast('Yay! New Target Added!')
       setIsCreatingTarget(false)
       resetCreating()

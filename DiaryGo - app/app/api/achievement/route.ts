@@ -6,20 +6,21 @@ await connect_to_mongo()
 
 export async function POST(request: NextRequest) {
     try {
-        const { task, userId } = await request.json();
+        const { task, userId, date } = await request.json();
 
-        if (!task) {
-            return NextResponse.json({ message: "Task not found!" })
+        if (!task || !userId || !date) {
+            return NextResponse.json({ message: "Task or userId or date not found!" }, { status: 404 })
         }
 
         const new_task = new achievement({
             task: task,
-            userId: userId
+            userId: userId,
+            date: date
         })
         await new_task.save();
-        return NextResponse.json({ status: 200, message: "Task saved!", data: new_task })
+        return NextResponse.json({ message: "Task saved!", data: new_task }, { status: 200 })
     } catch (error) {
-        return NextResponse.json({ message: "Internal Server Error", error: error })
+        return NextResponse.json({ message: "Internal Server Error", error: error }, { status: 500 })
     }
 }
 
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
         const date = url.searchParams.get('date');
 
         if (!userId || !date) {
-            return NextResponse.json({ message: "User ID and Date are required!" });
+            return NextResponse.json({ message: "User ID and Date are required!" }, { status: 400 });
         }
 
         const target_achievements = await achievement.find({ userId: userId, date: date });
@@ -38,8 +39,8 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ message: "No achievements found!" });
         }
 
-        return NextResponse.json({ status: 200, message: "Achievements found!", data: target_achievements });
+        return NextResponse.json({ message: "Achievements found!", data: target_achievements }, { status: 200 });
     } catch (error) {
-        return NextResponse.json({ message: "Internal Server Error", error: error })
+        return NextResponse.json({ message: "Internal Server Error", error: error }, { status: 500 });
     }
 }
