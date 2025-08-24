@@ -1,12 +1,14 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import Diary_task_card from '../Components/Dairy_task_card';
 import { format, addDays, subDays, isAfter } from "date-fns";
 import { MdOutlineAdd } from "react-icons/md";
 import { useForm, SubmitHandler } from "react-hook-form"
 import { ToastContainer, toast } from 'react-toastify';
-import { sendMessage } from '../Components/APIs';
+import { sendMessage, uploadNewTask } from '../Components/APIs';
+import { fetchSession } from '../Utilities/actions/auth';
 import { v4 as UUIDv4 } from 'uuid';
+import { useCurrentUser } from '../Components/CurrentUser';
 
 const Page = () => {
   const today = new Date();
@@ -42,6 +44,7 @@ const Page = () => {
 
   // State List
   const [isCreating, setIsCreating] = useState<Boolean>(false)
+  const [isCreatingTarget, setIsCreatingTarget] = useState<Boolean>(false)
   const [isAddingAchievement, setIsAddingAchievement] = useState<Boolean>(false)
   const [currentDate, setCurrentDate] = useState<Date>(today);
   const [daily_task_card_list, setDaily_task_card_list] = useState<TaskCard[]>([])
@@ -67,15 +70,34 @@ const Page = () => {
 
   // Handle Creating Target Form
   const onCreatingTarget: SubmitHandler<OnCreatingTarget> = async (data) => {
+    setIsCreatingTarget(true)
     console.log(data)
 
-    const task_list = await sendMessage(data.tasks)
+    const prompt = `
+      you are given a text containing a list of tasks- make me a list of tasks using them - the text is: ${data.tasks}
+      I need an array of tasks. like ["task1", "task2", "task3"] made of my given input.
+    `
+
+    const task_list = await sendMessage(prompt)
     console.log(task_list)
 
-    toast('Yay! New Target Added!')
-    // resetCreating()
+    const response = await uploadNewTask({
+      userId: currentUser as string,
+      target: data.target,
+      task_list: task_list
+    })
+
+    console.log("response : ", response)
+
+    if (response?.status === 200) {
+      toast('Yay! New Target Added!')
+      setIsCreatingTarget(false)
+      resetCreating()
+    }
   }
 
+  // Fetch Current User
+  const currentUser = useCurrentUser();
 
   return (
     <div className='w-full'>
@@ -126,7 +148,7 @@ const Page = () => {
 
               <input
                 type="submit"
-                value="Submit"
+                value={`${isCreatingTarget ? "Creating...." : "Create Target"}`}
                 className="bg-blue-500 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-600 transition"
               />
             </form>

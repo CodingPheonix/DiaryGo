@@ -6,6 +6,9 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { classification_tool, createTaskList } from "./tools";
 import { StructuredTool } from "@langchain/core/tools";
 import { Runnable } from "@langchain/core/runnables";
+import { AIMessage, HumanMessage } from "@langchain/core/messages";
+import type { RunnableConfig } from "@langchain/core/runnables";
+import { AgentState } from './graph';
 
 // INITIALISE GEMINI LLM
 export const gemini = new ChatGoogleGenerativeAI({
@@ -15,8 +18,8 @@ export const gemini = new ChatGoogleGenerativeAI({
 })
 
 // List of tool Initialisation
-const makeTaskList = new createTaskList()
-const classify = new classification_tool()
+export const makeTaskList = new createTaskList()
+export const classify = new classification_tool()
 
 // FUNCTION TO CREATE AGENTS 
 async function createAgent({
@@ -51,17 +54,65 @@ async function createAgent({
     return prompt.pipe(llm.bind({ tools: tools }));
 }
 
+// Helper function for running agent node
+async function runAgentNode(props: {
+    state: typeof AgentState.State;
+    agent: Runnable;
+    name: string;
+    config?: RunnableConfig;
+}) {
+    const { state, agent, name, config } = props;
+    let result = await agent.invoke(state, config);
+    if (!result?.tool_calls || result.tool_calls.length === 0) {
+        // result = new AIMessage({ ...result, name: name });
+        result.name = name;
+    }
+    return {
+        messages: [result],
+        sender: name,
+    };
+}
+
+// task list generator
 export const task_list_generator = await createAgent({
     llm: gemini,
     tools: [makeTaskList],
     systemMessage: "Generate an array of tasks from a lump of text",
 })
 
-export const router_agent_node = await createAgent({
+// helper function for task list generator
+export async function task_list_generator_node(state: typeof AgentState.State) {
+    return runAgentNode({
+        state: state,
+        agent: task_list_generator,
+        name: "task_list_generator",
+    });
+}
+
+// router agent 
+export const router_agent = await createAgent({
     llm: gemini,
     tools: [classify],
     systemMessage: `
         Your job is to classify the user's intent based on their message.
-        Use the tool classify to determine the next agent to use
+        Use the tool classify to determine the next agent to use.
+        You are a router. You must ONLY output one of:
+        - "call_tool"
+        - "task_list_generator"
+        - "continue"
+        - "end"
     `
 })
+
+// helper function for router agent
+export async function router_agent_node(
+    state: typeof AgentState.State,
+    config?: RunnableConfig,
+) {
+    return runAgentNode({
+        state: state,
+        agent: router_agent,
+        name: "router_agent",
+        config,
+    });
+}

@@ -2,19 +2,19 @@ import mongoose from "mongoose";
 
 const target = new mongoose.Schema({
     name: {type: String, required: true},
-    progress: {type: String, required: true}
+    progress: {type: Number, default: 0}
 })
 
 const task = new mongoose.Schema({
     name: {type: String, required: true},
-    progress: {type: String, required: true}
+    progress: {type: Number, default: 0}
 })
 
 const diary_schema = new mongoose.Schema({
-    user_id : {type: String, required: true},
+    userId : {type: String, required: true},
     target: target,
     task_list: [task],
-    target_achieved: {type: Boolean, required: true}
+    target_achieved: {type: Boolean, default: false}
 })
 
 const auth_schema = new mongoose.Schema({

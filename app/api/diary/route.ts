@@ -12,10 +12,16 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ message: "User id or Target or Task List is Missing!" })
         }
 
+        const modified_task_list = task_list.map((task: string) => ({
+            name: task,
+            progress: 0
+        }));
+
         const new_diary = new diary({
             userId: userId,
-            target: target,
-            task_list: task_list
+            target: { name: target, progress: 0 },
+            task_list: modified_task_list,
+            target_achieved: false
         })
         await new_diary.save()
         return NextResponse.json({ status: 200, message: "New Diary created successfully!", data: new_diary })
@@ -64,17 +70,18 @@ export async function PATCH(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
     try {
-        const { userId } = await request.json();
+        const { searchParams } = new URL(request.url)
+        const userId = searchParams.get("userId");
 
         if (!userId) {
-            return NextResponse.json({ message: "Diary id is Missing!" })
+            return NextResponse.json({ message: "User id is Missing!" })
         }
 
         const target_diary = await diary.find({ userId: userId })
         if (!target_diary) {
-            return NextResponse.json({ message: "Targer Diary is Missing!" }, { status: 404 })
+            return NextResponse.json({ message: "Target User has no Diary!" }, { status: 404 })
         }
-        return NextResponse.json({ message: "Target diary fetched" }, { status: 200 })
+        return NextResponse.json({ message: "Target diary fetched", data: target_diary }, { status: 200 })
     } catch (error) {
         return NextResponse.json({ message: "Internal Server Error!" }, { status: 500 })
     }

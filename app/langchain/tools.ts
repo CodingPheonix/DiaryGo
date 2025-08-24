@@ -1,15 +1,16 @@
 import { StructuredTool } from "@langchain/core/tools";
+import { tool } from "@langchain/core/tools";
 import { gemini } from "./agent";
 import z from "zod";
 
 export class createTaskList extends StructuredTool {
-    name: string = "Task_list_generator";
+    name: string = "task_list_generator";
     description: string = "Create a task list out of raw text containing the list of tasks"
     schema = z.object({
-        input: z.string().describe("Text containg tasks")
+        input: z.string().describe("Text containing tasks")
     })
 
-    async _call( input: string ) {
+    async _call({ input }: { input: string }) {
         const response = await gemini.invoke(`
             You are an expert in extracting and structuring tasks from unorganized text.
             Your job is to TAKE, UNDERSTAND, SEPARATE, and RETURN the input text as a clean, concise list of actionable tasks.
@@ -34,7 +35,9 @@ export class createTaskList extends StructuredTool {
             Input Text : ${input}
         `)
 
-        return response
+        return typeof response.content === "string"
+            ? response.content
+            : JSON.stringify(response.content);
     }
 }
 
@@ -45,7 +48,7 @@ export class classification_tool extends StructuredTool {
         input: z.string().describe("Text to figure out tool to be used")
     })
 
-    async _call( input: string ) {
+    async _call({ input }: { input: string }) {
         const prompt = `
             You are an expert routing agent. Your ability is to figure out which agent to use next based on the user's intent.
             Generate only the name of the tool, nothing else.
@@ -55,11 +58,13 @@ export class classification_tool extends StructuredTool {
             output : "task_list_generator"
 
             The available tools are:
-            - Task_list_generator: Create a task list out of raw text containing the list of tasks
+            - task_list_generator: Create a task list out of raw text containing the list of tasks
 
             User input is: ${input}
         `
         const response = await gemini.invoke(prompt)
-        return response
+        return typeof response.content === "string"
+            ? response.content
+            : JSON.stringify(response.content);
     }
 }

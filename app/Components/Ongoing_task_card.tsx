@@ -4,21 +4,27 @@ import { Card } from "@/components/ui/card";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface SubTask {
-  name: string;
-  progress: number;
+    name: string;
+    progress: number;
 }
 
 interface OngoingTaskCard {
-  task: string;
-  taskList: SubTask[]; // ✅ dynamic-length array of subtasks
+    task: string;
+    taskList: SubTask[]; // ✅ dynamic-length array of subtasks
 }
 
-const Ongoing_task_card: React.FC<OngoingTaskCard> = ({ task, taskList }) => {
+const Ongoing_task_card: React.FC<OngoingTaskCard> = (taskObj) => {
+    const {task, taskList} = taskObj;
+    console.log("task : ", taskObj);
+
+    console.log("taskList : ", taskList);
     const [isOpen, setIsOpen] = useState(false);
 
     // main progress = average of subtasks
     const averageProgress =
-        taskList.reduce((sum, t) => sum + t.progress, 0) / taskList.length;
+        (taskList?.reduce((sum, t) => sum + t.progress, 0) ?? 0) /
+        (taskList?.length ?? 1);
+
 
     return (
         <Card onClick={() => setIsOpen(!isOpen)} className="w-full mx-auto p-4 shadow-lg rounded-2xl bg-white">
@@ -74,7 +80,7 @@ const Ongoing_task_card: React.FC<OngoingTaskCard> = ({ task, taskList }) => {
                     }`}
             >
                 <ul className="flex flex-col gap-2">
-                    {taskList.map((t, index) => (
+                    {Array.isArray(taskList) && taskList.map((t, index) => (
                         <li
                             key={index}
                             className="flex items-center justify-between p-2 rounded-lg bg-gray-50"

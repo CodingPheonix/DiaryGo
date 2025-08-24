@@ -1,53 +1,60 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Ongoing_task_card from '../Components/Ongoing_task_card'
 import Completed_task_card from '../Components/Completed_task_card'
+import { useCurrentUser } from '../Components/CurrentUser'
+import { fetchAllTargets } from '../Components/APIs'
 
 const page = () => {
 
-  type SubTask = {
-    name: string;
-    progress: number; // percentage (0–100)
+  type Task = {
+    userId: string;
+    target: { name: string; progress: number; _id: string };
+    task_list: { name: string; progress: number; _id: string }[];
+    target_achieved: boolean;
   };
 
-  type OngoingTask = {
-    task: string;
-    taskList: SubTask[];
-  };
+  // State List
+  const [ongoing_task_list, setOngoing_task_list] = useState<Task[]>([])
+  const [completed_Task_List, setCompleted_Task_List] = useState<Task[]>([])
 
-  type CompletedTask = {
-    task: string;
-  };
+  // Fetch Current User
+  const currentUser = useCurrentUser();
 
+  useEffect(() => {
+    const func = async () => {
+      const fetch_all_targets = await fetchAllTargets(currentUser as string);
 
-  const [ongoing_task_list, setOngoing_task_list] = useState<OngoingTask[]>([
-    {
-      task: "learn AI",
-      taskList: [
-        { name: "learn python", progress: 20 },
-        { name: "learn java", progress: 50 },
-      ],
-    },
-    {
-      task: "learn AI",
-      taskList: [
-        { name: "learn python", progress: 20 },
-        { name: "learn java", progress: 50 },
-      ],
-    },
-    {
-      task: "learn AI",
-      taskList: [
-        { name: "learn python", progress: 20 },
-        { name: "learn java", progress: 50 },
-      ],
-    },
-  ])
-  const [completed_Task_List, setCompleted_Task_List] = useState<CompletedTask[]>([
-    { task: "learn AI" },
-    { task: "learn AI" },
-    { task: "learn AI" },
-  ])
+      console.log("fetch_all_targets : ", fetch_all_targets);
+
+      let ongoingTasks: Task[] = [];
+      let completedTasks: Task[] = [];
+
+      if (Array.isArray(fetch_all_targets.data)) {
+        fetch_all_targets.data.forEach((target: Task) => {
+          if (!target.target_achieved) {
+            ongoingTasks.push({
+              target: target.target,
+              task_list: target.task_list,
+              userId: target.userId,
+              target_achieved: target.target_achieved
+            });
+          } else {
+            completedTasks.push({
+              target: target.target,
+              task_list: target.task_list,
+              userId: target.userId,
+              target_achieved: target.target_achieved
+            });
+          }
+        });
+
+        setOngoing_task_list(ongoingTasks);
+        setCompleted_Task_List(completedTasks);
+      }
+    }
+    func();
+  }, [currentUser])
 
   return (
     <div className='flex flex-col justify-around items-center w-[90%] mx-auto min-h-screen'>
@@ -59,7 +66,7 @@ const page = () => {
             ongoing_task_list.map((task, index) => {
               return (
                 <li key={index}>
-                  <Ongoing_task_card task={task.task} taskList={task.taskList} />
+                  <Ongoing_task_card task={task.target.name} taskList={task.task_list} />
                 </li>
               )
             })
@@ -77,7 +84,7 @@ const page = () => {
             completed_Task_List.map((task, index) => {
               return (
                 <li key={index}>
-                  <Completed_task_card task_name={task.task} />
+                  <Completed_task_card task_name={task.target.name} />
                 </li>
               )
             })
