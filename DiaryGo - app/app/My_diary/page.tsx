@@ -66,8 +66,9 @@ const Page = () => {
     setIsSubmittingAchievement(true)
 
     const prompt = `
-      You are given an achievement. Look for related targets and check which tasks are relevant. Update the progress.
-      Achievement: ${data.target}
+      I want to update the progress of my tasks. Here are some documents:
+      Achievement: ${data.target},
+      userId: ${currentUser}
     `
     const response = await sendMessage(prompt)   // Calculate the progress and other tasks through Agent
 

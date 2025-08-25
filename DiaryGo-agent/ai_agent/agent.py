@@ -2,13 +2,16 @@ import os
 from langchain.chat_models import init_chat_model
 
 from .state import State
+from .tools import get_targets, update_targets
 
 os.environ["GOOGLE_API_KEY"] = "AIzaSyASEo5ZANhbtkl1KwMCo_KvCN_c1jetjec"
 
 llm = init_chat_model("google_genai:gemini-2.0-flash")
+tools = [get_targets, update_targets]
+llm_with_tools = llm.bind_tools(tools)
 
 def chatbot(state: State):
-    return {"messages": [llm.invoke(state["messages"])]}
+    return {"messages": [llm_with_tools.invoke(state["messages"])]}
 
 def router(state: State):
     prompt = f"""
@@ -25,6 +28,10 @@ def router(state: State):
         Example 1: 
         input : "I want to create a task list. task list is: Buy milk, Walk the dog"
         output : "task_list_generator"
+
+        Example 2:
+        input : "I want to update the progress of my tasks. Here are some documents: Achievement: i have read for 30 min, userId: 123456789"
+        output: "update_progress"
 
         User input is: {state["messages"][-1].content}
     """
@@ -70,12 +77,35 @@ def task_list_generator(state: State):
 def progress_updator(state: State):
     prompt = f"""
         You are an expert in tracking progress on tasks.
-        Your job consists of __ steps :
-        1. Read the input text from the user.
-        2. Fetch the present incomplete targets from other agents.
-        3. Summarize the progress made on each task.
+        Your job consists of 5 steps :
+        1. Read the input achievement from the user.
+        2. Read all the target details recieved from other agents
+        3. Precisely, go through each targets, find related targets matching the achievement.
         4. Calculate a rough percentage of completion for each task.
-        5. Generate a report summarizing the overall progress.
+        5. Generate a report on updated progresses in the format:
+            [
+                {
+                    "diary_id": "123",
+                    "target": {
+                        "name" : "target1",
+                        "progress" : 40
+                    }
+                    "task_list": [
+                        {"name": "task1", "progress": 80},
+                        {"name": "task2", "progress": 100}
+                    ]
+                },
+                {
+                    "diary_id": "456",
+                    "target": {
+                        "name" : "targetA",
+                        "progress" : 20
+                    }
+                    "task_list": [
+                        {"name": "taskA", "progress": 20}
+                    ]
+                }
+            ]
 
         ### Important:
         - The following examples are ONLY for illustration.  
@@ -107,7 +137,45 @@ def database_manager(state: State):
     prompt = f"""
         You are an expert Database Manager. 
         Your abilities are fetching and Updating databases.
-        You will:
-            Fetch from database:
-                - understand
+        You have access to tools: get_targets (for getting targets), update_targets (for updating targets)
+
+        Your job will contain 2 tasks:
+        1. Getting targets
+        2. Updating Targets
+
+        For getting Targets: 
+        - use the get_targets tool.
+        - Above messages will have the userId.
+        - Pass it to the function
+        - return the recieved json.
+
+        For Updating tasks:
+        - Use the update_targets tool
+        - You will get an array of the following structure:
+            [
+                {
+                    "diary_id": "123",
+                    "target": {
+                        "name" : "target1",
+                        "progress" : 40
+                    }
+                    "task_list": [
+                        {"name": "task1", "progress": 80},
+                        {"name": "task2", "progress": 100}
+                    ]
+                },
+                {
+                    "diary_id": "456",
+                    "target": {
+                        "name" : "targetA",
+                        "progress" : 20
+                    }
+                    "task_list": [
+                        {"name": "taskA", "progress": 20}
+                    ]
+                }
+            ]
+        - Pass the entire array as diaries varible to the tool
+        - return the output 
     """
+    return {"messages": [llm_with_tools.invoke(prompt)]}
