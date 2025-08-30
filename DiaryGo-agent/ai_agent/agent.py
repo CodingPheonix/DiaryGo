@@ -1,5 +1,7 @@
 import os
 from langchain.chat_models import init_chat_model
+from langgraph.prebuilt import ToolNode
+from langchain_core.messages import ToolMessage, AIMessage
 
 from .state import State
 from .tools import get_targets, update_targets
@@ -7,7 +9,10 @@ from .tools import get_targets, update_targets
 os.environ["GOOGLE_API_KEY"] = "AIzaSyASEo5ZANhbtkl1KwMCo_KvCN_c1jetjec"
 
 llm = init_chat_model("google_genai:gemini-2.0-flash")
+tool_mapping = {"get_targets": get_targets, "update_targets": update_targets}
+
 tools = [get_targets, update_targets]
+tool_node = ToolNode(tools)
 llm_with_tools = llm.bind_tools(tools)
 
 def chatbot(state: State):
@@ -75,13 +80,14 @@ def task_list_generator(state: State):
     return {"messages": [llm.invoke(prompt)]}
 
 def progress_updator(state: State):
-    prompt = f"""
+    prompt = """
         You are an expert in tracking progress on tasks.
         Your job consists of 5 steps :
         1. Read the input achievement from the user.
         2. Read all the target details recieved from other agents
         3. Precisely, go through each targets, find related targets matching the achievement.
         4. Calculate a rough percentage of completion for each task.
+        5. MAKE sure to add the word "progressUpdated" in return. IMPORTANT
         5. Generate a report on updated progresses in the format:
             [
                 {
@@ -114,68 +120,132 @@ def progress_updator(state: State):
 
         Example 1:
         input : "
-            I have completed the following tasks: i have watched 1 youtube videos for langchain and practiced it by making a project.
+            I have completed the following tasks: I woke up at 6am today
         "
-        fetched data: "
-            target: Master Langchain and Langgraph
-            tasks: (name: watch 2 youtube videos on langchain, progress: 0), 
-                   (name: make 3 projects on langchain, progress: 0),
-                   (name: upload 3 posts on linkedIn, progress: 0)
-        "
-        output : (
-            target: Master Langchain and Langgraph
-            tasks: (name: watch 2 youtube videos on langchain, progress: 50), 
-                   (name: make 3 projects on langchain, progress: 33),
-                   (name: upload 3 posts on linkedIn, progress: 0)
-        )
+        fetched data: [
+                        {
+                            "_id": "68ab05fcabf3ed485bd287be",
+                            "userId": "68a1c65412e11e994c2dfbcf",
+                            "target": {
+                                "name": "make a habit to wake up early",
+                                "progress": 0,
+                                "_id": "68ab05fcabf3ed485bd287bf"
+                            },
+                            "task_list": [
+                                {
+                                    "name": "Wake up at 6am",
+                                    "progress": 0,
+                                    "_id": "68ab05fcabf3ed485bd287c0"
+                                },
+                                {
+                                    "name": "Wake up at 5am",
+                                    "progress": 0,
+                                    "_id": "68ab05fcabf3ed485bd287c1"
+                                },
+                                {
+                                    "name": "Wake up at 4am",
+                                    "progress": 0,
+                                    "_id": "68ab05fcabf3ed485bd287c2"
+                                }
+                            ],
+                            "target_achieved": false,
+                            "__v": 0,
+                            "diary_id": "68ab05fcabf3ed485bd287be"
+                        }
+                    ]
+        output : ProgressUpdated. 
+            [
+                {
+                    "diary_id": "68ab05fcabf3ed485bd287be",
+                    "target": {
+                        "name" : "make a habit to wake up early",
+                        "progress" : 33
+                    },
+                    "task_list": [
+                            {
+                                "name": "Wake up at 6am",
+                                "progress": 100,
+                            },
+                            {
+                                "name": "Wake up at 5am",
+                                "progress": 0,
+                            },
+                            {
+                                "name": "Wake up at 4am",
+                                "progress": 0,
+                            }
+                    ],
+                }
+            ]
+    """ + f"User input is: {state["messages"]}"
 
-        User input is: {state["messages"]}
-    """
     return {"messages": [llm.invoke(prompt)]}
 
 def database_manager(state: State):
-    prompt = f"""
-        You are an expert Database Manager. 
-        Your abilities are fetching and Updating databases.
-        You have access to tools: get_targets (for getting targets), update_targets (for updating targets)
+    prompt = """
+        You are an expert Database Manager AI.  
+        You can perform two main actions using tools:  
+        1. Fetching targets  
+        2. Updating targets  
+        You will only use one at a time
 
-        Your job will contain 2 tasks:
-        1. Getting targets
-        2. Updating Targets
+        Available Tools:  
+        - get_targets(userId) → retrieves targets for a given userId.  
+        - Always include the key "fetchedTargets" in your response when using this tool.  
+        - update_targets(diaries) → updates targets and their task lists.  
+        - Always include the key "UpdatedTargets" in your response when using this tool. 
 
-        For getting Targets: 
-        - use the get_targets tool.
-        - Above messages will have the userId.
-        - Pass it to the function
-        - return the recieved json.
+        Decision:
+            If I have userId and achievement - use get_targets(userId) 
+            if i have diary_id and task list - use update_targets
 
-        For Updating tasks:
-        - Use the update_targets tool
-        - You will get an array of the following structure:
+        Instructions:  
+        - For continuing agentic workflow:
+         - If you use  get_targets: MUST INCLUDE "fetchedTargets" in response text
+         - If you use  update_targets: MUST INCLUDE "UpdatedTargets" in response text
+
+        - For fetching targets:  
+        • The userId will be provided in earlier messages.  
+        • Call the get_targets tool with this userId.  
+        • Return the fetched JSON with the key "fetchedTargets".  
+
+        - For updating targets:  
+        • You will be given an array of diary objects in this format:  
             [
                 {
                     "diary_id": "123",
                     "target": {
-                        "name" : "target1",
-                        "progress" : 40
-                    }
+                        "name": "target1",
+                        "progress": 40
+                    },
                     "task_list": [
                         {"name": "task1", "progress": 80},
                         {"name": "task2", "progress": 100}
                     ]
-                },
-                {
-                    "diary_id": "456",
-                    "target": {
-                        "name" : "targetA",
-                        "progress" : 20
-                    }
-                    "task_list": [
-                        {"name": "taskA", "progress": 20}
-                    ]
                 }
-            ]
-        - Pass the entire array as diaries varible to the tool
-        - return the output 
-    """
-    return {"messages": [llm_with_tools.invoke(prompt)]}
+            ]  
+        • Pass the entire array as the 'diaries' argument to update_targets.  
+        • Return the tool output with the key "UpdatedTargets".  
+
+        Always reason step by step, pick the correct tool based on the request, and ensure your response includes either "fetchedTargets" or "UpdatedTargets".  
+    """ + f"\nState messages: {state['messages']}"
+
+    llm_output = llm_with_tools.invoke(prompt)
+    tool_message = None
+
+    # process any tool calls
+    for tool_call in getattr(llm_output, "tool_calls", []):
+        tool_name = tool_call["name"].lower()
+        tool = tool_mapping.get(tool_name)
+
+        if tool:
+            tool_result = tool.invoke(tool_call["args"])
+            tool_message = ToolMessage(tool_result, tool_call_id=tool_call["id"])
+
+    # ask LLM again with updated context (messages + tool results)
+    final_response = AIMessage(content=(
+        f"fetchedTargets: {tool_message}"
+    ))
+
+    # ensure state is returned as required
+    return {"messages": [final_response.content]}

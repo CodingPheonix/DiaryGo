@@ -62,7 +62,7 @@ const Page = () => {
 
   // Handle Achievement Submission Form
   const onAchievementSubmit: SubmitHandler<OnAchievementSubmit> = async (data) => {
-    // console.log(data.target)
+    console.log(data.target)
     setIsSubmittingAchievement(true)
 
     const prompt = `
@@ -253,7 +253,7 @@ const Page = () => {
           ></textarea>
           <input
             type="submit"
-            value="Submit"
+            value={`${isSubmittingAchievement ? 'Submitting......' : 'Submit'}`}
             className="bg-blue-500 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-600 transition"
           />
         </form>

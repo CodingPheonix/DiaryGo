@@ -6,10 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from ai_agent.graph import stream_graph_updates
 
 origins = [
-    "http://localhost.tiangolo.com",
-    "https://localhost.tiangolo.com",
-    "http://localhost",
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "*",
 ]
 
 app = FastAPI()
@@ -33,7 +32,7 @@ def read_root():
 def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
-@app.post("/graph/")
+@app.post("/graph")
 async def call_graph(user_input: UserRequest):
     response = await stream_graph_updates(user_input.user_input)
     return {"responses": response}
