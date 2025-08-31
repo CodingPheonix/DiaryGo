@@ -14,6 +14,10 @@ export default async function middleware(req: NextRequest) {
     const session = await decrypt(cookie)
     console.log(session)
 
+    // if (session?.userId) {
+    //     return NextResponse.redirect(new URL('/My_dairy', req.nextUrl))
+    // }
+
     if (isProtectedRoute) {
         if (!session?.userId) {         // if the user is not signed in, he will be redirected to the homepage
             return NextResponse.redirect(new URL('/', req.nextUrl))

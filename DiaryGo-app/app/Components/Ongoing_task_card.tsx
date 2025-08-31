@@ -15,9 +15,6 @@ interface OngoingTaskCard {
 
 const Ongoing_task_card: React.FC<OngoingTaskCard> = (taskObj) => {
     const {task, taskList} = taskObj;
-    console.log("task : ", taskObj);
-
-    console.log("taskList : ", taskList);
     const [isOpen, setIsOpen] = useState(false);
 
     // main progress = average of subtasks

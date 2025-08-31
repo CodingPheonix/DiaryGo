@@ -1,5 +1,4 @@
 const agentURL = process.env.NEXT_PUBLIC_AGENT_URL;
-console.log(agentURL)
 
 export async function sendMessage(message: string) {
     try {
@@ -12,8 +11,6 @@ export async function sendMessage(message: string) {
         if (!response.ok) {
             throw new Error("Failed to connect to API");
         }
-
-        console.log(response)
 
         const result = await response.json();
         const targetMessages = result.responses[result.responses.length - 1];
@@ -152,8 +149,6 @@ export async function UploadAchievement(params: { userId: string, task: string, 
 }
 
 export async function getAchievements(params: { userId: string, date: string }) {
-
-    console.log("userId", params.userId, "date", params.date)
     try {
         const response = await fetch(`/api/achievement?userId=${params.userId}&date=${params.date}`, {
             method: "GET",

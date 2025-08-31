@@ -57,7 +57,7 @@ export async function PATCH(request: NextRequest) {
             return NextResponse.json({ message: "Diary id or Task List is Missing!" })
         }
 
-        const target_diary = await diary.findOneAndUpdate(diaryId, {target_achieved: target_achieved}, {new: true})
+        const target_diary = await diary.findOneAndUpdate({_id: diaryId}, {target_achieved: target_achieved}, {new: true})
         if (!target_diary) {
             return NextResponse.json({ message: "Target Diary not found!" }, { status: 404 })
         }

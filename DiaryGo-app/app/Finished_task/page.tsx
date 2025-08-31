@@ -25,17 +25,13 @@ const Page = () => {
   useEffect(() => {
     const func = async () => {
       const fetch_all_targets = await fetchAllTargets(currentUser as string);
-
-      console.log("fetch_all_targets : ", fetch_all_targets);
-
       const ongoingTasks: Task[] = [];
       const completedTasks: Task[] = [];
 
       if (Array.isArray(fetch_all_targets.data)) {
         fetch_all_targets.data.forEach(async (target: Task) => {
-
+          
           if (target.target.progress === 100 && target.target_achieved === false) {
-            console.log(target)
             await modifyIsCompletedStatus({diaryId: target._id, target_achieved: true})
           }
 

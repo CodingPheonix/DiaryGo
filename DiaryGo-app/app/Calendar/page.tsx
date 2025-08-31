@@ -22,13 +22,11 @@ const Page = () => {
   const currentUser = CurrentUser();
 
   const [event_list, setEvent_list] = useState<event[]>([])
-  console.log(event_list);
 
   useEffect(() => {
-    if(!currentUser) return;
+    if (!currentUser) return;
     const fetchEvents = async () => {
       const events = await GetCalendarEvents({ userId: currentUser as string });
-      console.log(events);
       Array.isArray(events.data) && events.data.map((event: { event: string; date: string }) => {
         setEvent_list((prev) => [
           ...prev,

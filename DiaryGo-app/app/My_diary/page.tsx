@@ -65,7 +65,6 @@ const Page = () => {
 
   // Handle Achievement Submission Form
   const onAchievementSubmit: SubmitHandler<OnAchievementSubmit> = async (data) => {
-    console.log(data.target)
     setIsSubmittingAchievement(true)
     const curr_time = new Date().toString().trim().slice(15, 21)
 
@@ -75,7 +74,6 @@ const Page = () => {
       userId: ${currentUser}
     `
     const response = await sendMessage(prompt)   // Calculate the progress and other tasks through Agent
-    console.log(response)
 
     if (response) {
       // Upload achievement to current date and time
@@ -105,7 +103,6 @@ const Page = () => {
   // Handle Creating Target Form
   const onCreatingTarget: SubmitHandler<OnCreatingTarget> = async (data) => {
     setIsCreatingTarget(true)
-    console.log(data)
 
     const prompt = `
       you are given a text containing a list of tasks- make me a list of tasks using them - the text is: ${data.tasks}
@@ -113,7 +110,6 @@ const Page = () => {
     `
 
     const task_list = await sendMessage(prompt)   // get the list of tasks
-    console.log(task_list)
 
     const response = await uploadNewTask({    // upload the target
       userId: currentUser as string,
@@ -146,11 +142,6 @@ const Page = () => {
     }
     func()
   }, [currentUser, currentDate])
-
-  // console.log(daily_task_card_list)
-  // console.log(currentUser)
-  // console.log(format(currentDate, "yyyy-MM-dd"))
-
 
   return (
     <div className='w-full'>

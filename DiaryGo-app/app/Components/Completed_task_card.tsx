@@ -11,7 +11,6 @@ interface CompletedTaskCardProps {
 }
 
 const Completed_task_card: React.FC<CompletedTaskCardProps> = ({ task_name }) => {
-  console.log('task_name : ', task_name)
   return (
     <div className="flex items-center gap-7 w-full p-3 bg-white shadow rounded-xl hover:shadow-md transition">
       {/* Icon */}
