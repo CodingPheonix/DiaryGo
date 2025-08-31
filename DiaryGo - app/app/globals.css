@@ -116,7 +116,17 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+
+
+@media (max-width:428px) {
+  .fc .fc-toolbar {
+    display: flex;
+    flex-direction: column;
   }
 }

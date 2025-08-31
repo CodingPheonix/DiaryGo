@@ -51,13 +51,13 @@ export async function PUT(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
     try {
-        const { diary_id, target_achieved } = await request.json()
+        const { diaryId, target_achieved } = await request.json()
 
-        if (!diary_id || !target_achieved) {
+        if (!diaryId || !target_achieved) {
             return NextResponse.json({ message: "Diary id or Task List is Missing!" })
         }
 
-        const target_diary = await diary.findByIdAndUpdate(diary_id, { target_achieved: target_achieved }, { new: true })
+        const target_diary = await diary.findOneAndUpdate(diaryId, {target_achieved: target_achieved}, {new: true})
         if (!target_diary) {
             return NextResponse.json({ message: "Target Diary not found!" }, { status: 404 })
         }

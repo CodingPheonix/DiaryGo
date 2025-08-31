@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import Ongoing_task_card from '../Components/Ongoing_task_card'
 import Completed_task_card from '../Components/Completed_task_card'
 import { useCurrentUser } from '../Components/CurrentUser'
-import { fetchAllTargets } from '../Components/APIs'
+import { fetchAllTargets, modifyIsCompletedStatus } from '../Components/APIs'
 
 const page = () => {
 
@@ -12,6 +12,7 @@ const page = () => {
     target: { name: string; progress: number; _id: string };
     task_list: { name: string; progress: number; _id: string }[];
     target_achieved: boolean;
+    _id: string;
   };
 
   // State List
@@ -31,21 +32,17 @@ const page = () => {
       let completedTasks: Task[] = [];
 
       if (Array.isArray(fetch_all_targets.data)) {
-        fetch_all_targets.data.forEach((target: Task) => {
+        fetch_all_targets.data.forEach(async (target: Task) => {
+
+          if (target.target.progress === 100 && target.target_achieved === false) {
+            console.log(target)
+            await modifyIsCompletedStatus({diaryId: target._id, target_achieved: true})
+          }
+
           if (!target.target_achieved) {
-            ongoingTasks.push({
-              target: target.target,
-              task_list: target.task_list,
-              userId: target.userId,
-              target_achieved: target.target_achieved
-            });
+            ongoingTasks.push(target);
           } else {
-            completedTasks.push({
-              target: target.target,
-              task_list: target.task_list,
-              userId: target.userId,
-              target_achieved: target.target_achieved
-            });
+            completedTasks.push(target);
           }
         });
 

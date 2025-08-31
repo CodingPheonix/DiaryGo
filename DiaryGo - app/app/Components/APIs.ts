@@ -128,6 +128,26 @@ export async function fetchAllTargets(userId: string) {
     }
 }
 
+export async function modifyIsCompletedStatus(params: { diaryId: string, target_achieved: boolean }) {
+    try {
+        const response = await fetch(`/api/diary`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(params)
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to connect to API");
+        }
+
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error("Error in UploadToCalendar:", error);
+        throw error;
+    }
+}
+
 export async function UploadToCalendar(params: { userId: string; date: string; event: string }) {
     try {
         const response = await fetch(`/api/calendar`, {

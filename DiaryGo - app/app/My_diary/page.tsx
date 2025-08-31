@@ -175,7 +175,7 @@ const Page = () => {
       {/* Create Target  */}
       {isCreating && (
         <div className="flex flex-col items-center w-full">
-          <p className="text-center font-semibold text-2xl my-4">
+          <p className="text-center font-semibold text-2xl my-4 md:mx-0 mx-5">
             🌟 Yay! A new goal 🎯 What amazing thing do you want to achieve? 💪
           </p>
 
@@ -268,9 +268,7 @@ const Page = () => {
 
       {/* Form to Add Achievement */}
       <div
-        className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-    w-11/12 sm:w-5/6 md:w-3/4 lg:w-2/3 xl:w-2/3 max-h-[90vh] overflow-y-auto shadow-2xl
-    ${isAddingAchievement && !isCreating ? 'block' : 'hidden'}`}
+        className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 sm:w-5/6 md:w-3/4 lg:w-2/3 xl:w-2/3 max-h-[90vh] overflow-y-auto shadow-2xl ${isAddingAchievement && !isCreating ? 'block' : 'hidden'}`}
       >
         <form
           onSubmit={handleAchievementSubmit(onAchievementSubmit)}
