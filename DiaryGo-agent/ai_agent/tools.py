@@ -45,8 +45,13 @@ class Task(BaseModel):
     name: str
     progress: int
 
+class Target(BaseModel):
+    name: str
+    progress: int
+
 class Diary(BaseModel):
     diary_id: str
+    target: Target
     task_list: List[Task]
 
 class UpdateTargetsInput(BaseModel):
@@ -73,13 +78,14 @@ def update_targets(diaries: List[Diary]) -> dict:
     Update multiple diaries by sending their modified task lists 
     to the external server.
     """
-    url = f"http://localhost:3000/diary_for_agent"
+    url = f"http://localhost:3000/api/diary_for_agent"
 
     try:
         results = []
         for diary in diaries:
             response = requests.put(url, json={
                 "diary_id": diary.diary_id,
+                "target": diary.target.model_dump(),
                 "task_list": [task.model_dump() for task in diary.task_list]
             })
 

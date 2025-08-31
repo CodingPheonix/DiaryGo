@@ -1,4 +1,5 @@
 import os
+import json
 from langchain.chat_models import init_chat_model
 from langgraph.prebuilt import ToolNode
 from langchain_core.messages import ToolMessage, AIMessage
@@ -6,7 +7,7 @@ from langchain_core.messages import ToolMessage, AIMessage
 from .state import State
 from .tools import get_targets, update_targets
 
-os.environ["GOOGLE_API_KEY"] = "AIzaSyASEo5ZANhbtkl1KwMCo_KvCN_c1jetjec"
+os.environ["GOOGLE_API_KEY"] = "AIzaSyBqqKi8__bKE-pVICUP98kBHXU9jiv2phA"
 
 llm = init_chat_model("google_genai:gemini-2.0-flash")
 tool_mapping = {"get_targets": get_targets, "update_targets": update_targets}
@@ -190,9 +191,9 @@ def database_manager(state: State):
         You will only use one at a time
 
         Available Tools:  
-        - get_targets(userId) → retrieves targets for a given userId.  
+        - get_targets("userId") → retrieves targets for a given userId.  
         - Always include the key "fetchedTargets" in your response when using this tool.  
-        - update_targets(diaries) → updates targets and their task lists.  
+        - update_targets(diaries: ["diary_id", "target", "task_list"]) → updates targets and their task lists.  
         - Always include the key "UpdatedTargets" in your response when using this tool. 
 
         Decision:
@@ -224,14 +225,16 @@ def database_manager(state: State):
                     ]
                 }
             ]  
-        • Pass the entire array as the 'diaries' argument to update_targets.  
+        • Pass the entire array as the 'diaries' argument (consisting of diary_id, target and task_list) to update_targets.  
         • Return the tool output with the key "UpdatedTargets".  
 
+        ### Important:
         Always reason step by step, pick the correct tool based on the request, and ensure your response includes either "fetchedTargets" or "UpdatedTargets".  
     """ + f"\nState messages: {state['messages']}"
 
     llm_output = llm_with_tools.invoke(prompt)
     tool_message = None
+    tool_used = ""
 
     # process any tool calls
     for tool_call in getattr(llm_output, "tool_calls", []):
@@ -239,13 +242,19 @@ def database_manager(state: State):
         tool = tool_mapping.get(tool_name)
 
         if tool:
+            tool_used = tool_name
             tool_result = tool.invoke(tool_call["args"])
             tool_message = ToolMessage(tool_result, tool_call_id=tool_call["id"])
 
     # ask LLM again with updated context (messages + tool results)
-    final_response = AIMessage(content=(
-        f"fetchedTargets: {tool_message}"
-    ))
+    if tool_used == "get_targets":
+        final_response = {
+            "fetchedTargets": tool_result  # keep raw JSON/dict
+        }
+    else:
+        final_response = {
+            "UpdatedTargets": tool_result
+        }
 
-    # ensure state is returned as required
-    return {"messages": [final_response.content]}
+    # return as stringified JSON so it's valid
+    return {"messages": [AIMessage(content=json.dumps(final_response))]}
