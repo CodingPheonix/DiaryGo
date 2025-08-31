@@ -3,11 +3,14 @@ import json
 from langchain.chat_models import init_chat_model
 from langgraph.prebuilt import ToolNode
 from langchain_core.messages import ToolMessage, AIMessage
+from dotenv import load_dotenv
 
 from .state import State
 from .tools import get_targets, update_targets
 
-os.environ["GOOGLE_API_KEY"] = "AIzaSyBqqKi8__bKE-pVICUP98kBHXU9jiv2phA"
+load_dotenv()
+
+os.environ["GOOGLE_API_KEY"] = os.getenv("GEMINI_API_KEY")
 
 llm = init_chat_model("google_genai:gemini-2.0-flash")
 tool_mapping = {"get_targets": get_targets, "update_targets": update_targets}

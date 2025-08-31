@@ -64,9 +64,9 @@ const Navbar = () => {
                 <Link href={'/Finished_task'}>
                     <li className="hover:text-blue-600 cursor-pointer transition">Finished Tasks</li>
                 </Link>
-                <Link href={'/Contact'}>
+                <a href="https://www.iamsayan.com/Contact">
                     <li className="hover:text-blue-600 cursor-pointer transition">Contact Us</li>
-                </Link>
+                </a>
             </ul>
 
             {/* Mobile Menu (Hamburger) */}
@@ -92,18 +92,34 @@ const Navbar = () => {
             {isMobileMenuOpen && (
                 <div className="absolute top-16 right-4 w-48 bg-white shadow-lg rounded-lg p-4 md:hidden z-10">
                     <ul className="flex flex-col gap-4 text-gray-600 font-medium">
-                        <Link href={'/My_diary'}>
-                            <li onClick={() => { setIsMobileMenuOpen(!isMobileMenuOpen) }} className="hover:text-blue-600 cursor-pointer transition">My Diary</li>
-                        </Link>
-                        <Link href={'/Calendar'}>
-                            <li onClick={() => { setIsMobileMenuOpen(!isMobileMenuOpen) }} className="hover:text-blue-600 cursor-pointer transition">Calendar</li>
-                        </Link>
-                        <Link href={'/Finished_task'}>
-                            <li onClick={() => { setIsMobileMenuOpen(!isMobileMenuOpen) }} className="hover:text-blue-600 cursor-pointer transition">Finished Tasks</li>
-                        </Link>
-                        <Link href={'/Contact'}>
-                            <li onClick={() => { setIsMobileMenuOpen(!isMobileMenuOpen) }} className="hover:text-blue-600 cursor-pointer transition">Contact Us</li>
-                        </Link>
+                        <li onClick={() => setIsMobileMenuOpen(false)}>
+                            <Link href="/My_diary" className="hover:text-blue-600 cursor-pointer transition">
+                                My Diary
+                            </Link>
+                        </li>
+
+                        <li onClick={() => setIsMobileMenuOpen(false)}>
+                            <Link href="/Calendar" className="hover:text-blue-600 cursor-pointer transition">
+                                Calendar
+                            </Link>
+                        </li>
+
+                        <li onClick={() => setIsMobileMenuOpen(false)}>
+                            <Link href="/Finished_task" className="hover:text-blue-600 cursor-pointer transition">
+                                Finished Tasks
+                            </Link>
+                        </li>
+
+                        <li onClick={() => setIsMobileMenuOpen(false)}>
+                            <a
+                                href="https://www.iamsayan.com/Contact"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-blue-600 cursor-pointer transition"
+                            >
+                                Contact Us
+                            </a>
+                        </li>
                     </ul>
                     {isLoggedIn ? (
                         <div className='flex flex-col relative pt-4'>

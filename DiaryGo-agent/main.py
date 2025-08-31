@@ -1,15 +1,16 @@
+import os
 from typing import Union
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 
 from ai_agent.graph import stream_graph_updates
 
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "*",
-]
+load_dotenv()
+
+origins = [os.getenv('ORIGIN').split(',')]
+print(origins)
 
 app = FastAPI()
 
