@@ -36,8 +36,8 @@ def get_targets(userId: str):
         It takes the userId as an argument
         Calls an api to the database and fetches the diary details.
     """
-    url = f'{url}/api/diary_for_agent?userId={userId}'
-    response = requests.get(url)
+    ful_url = f'{url}/api/diary_for_agent?userId={userId}'
+    response = requests.get(ful_url)
     if response.status_code == 200:
         result = response.json()
         return result
@@ -50,12 +50,12 @@ def update_targets(diaries: List[Diary]) -> dict:
     Update multiple diaries by sending their modified task lists 
     to the external server.
     """
-    url = f"{url}/api/diary_for_agent"
+    ful_url = f"{url}/api/diary_for_agent"
 
     try:
         results = []
         for diary in diaries:
-            response = requests.put(url, json={
+            response = requests.put(ful_url, json={
                 "diary_id": diary.diary_id,
                 "target": diary.target.model_dump(),
                 "task_list": [task.model_dump() for task in diary.task_list]

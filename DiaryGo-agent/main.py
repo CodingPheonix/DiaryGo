@@ -9,7 +9,7 @@ from ai_agent.graph import stream_graph_updates
 
 load_dotenv()
 
-origins = [os.getenv('ORIGIN').split(',')]
+origins=os.getenv('ORIGIN').split(',')
 print(origins)
 
 app = FastAPI()
@@ -28,6 +28,10 @@ class UserRequest(BaseModel):
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
+
+@app.get("/getorigin")
+def getorigin():
+    return {f"origins:{origins}"}
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
