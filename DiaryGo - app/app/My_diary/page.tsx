@@ -5,11 +5,14 @@ import { format, addDays, subDays, isAfter } from "date-fns";
 import { MdOutlineAdd } from "react-icons/md";
 import { useForm, SubmitHandler } from "react-hook-form"
 import { ToastContainer, toast } from 'react-toastify';
-import { sendMessage, UploadAchievement, uploadNewTask, UploadToCalendar } from '../Components/APIs';
+import { getAchievements, sendMessage, UploadAchievement, uploadNewTask, UploadToCalendar } from '../Components/APIs';
 import { useCurrentUser } from '../Components/CurrentUser';
 
 const Page = () => {
   const today = new Date();
+
+  // Fetch Current User
+  const currentUser = useCurrentUser();
 
   // Type Declarations
   type OnAchievementSubmit = {
@@ -64,6 +67,7 @@ const Page = () => {
   const onAchievementSubmit: SubmitHandler<OnAchievementSubmit> = async (data) => {
     console.log(data.target)
     setIsSubmittingAchievement(true)
+    const curr_time = new Date().toString().trim().slice(15, 21)
 
     const prompt = `
       I want to update the progress of my tasks. Here are some documents:
@@ -71,18 +75,27 @@ const Page = () => {
       userId: ${currentUser}
     `
     const response = await sendMessage(prompt)   // Calculate the progress and other tasks through Agent
+    console.log(response)
 
-    if (response.status === 200) {
-
-      // Upload achievement to current date
+    if (response) {
+      // Upload achievement to current date and time
       await UploadAchievement({
         userId: currentUser as string,
         task: data.target,
-        date: format(currentDate, "yyyy-MM-dd").slice(0, 10)
+        date: format(new Date(), "yyyy-MM-dd").slice(0, 10),
+        time: curr_time
       })
 
+      await UploadToCalendar({    // add event to calendar
+        userId: currentUser as string,
+        date: format(new Date(), "yyyy-MM-dd").slice(0, 10),
+        event: data.target
+      });
+
+      setDaily_task_card_list((prev) => [...prev, { task: data.target, time: curr_time }])
       setIsSubmittingAchievement(false)
       setIsAddingAchievement(false)
+      toast("Yay! New achievement added")
       resetAchievement()
     } else {
       toast.error("Failed to add achievement")
@@ -109,7 +122,7 @@ const Page = () => {
     })
 
     const date = new Date();
-    const formattedDate = format(date, "yyyy-MM-dd").slice(0, 10);    // get the current time
+    const formattedDate = format(date, "yyyy-MM-dd").slice(0, 10);    // get the current date
 
     await UploadToCalendar({    // add event to calendar
       userId: currentUser as string,
@@ -124,8 +137,20 @@ const Page = () => {
     }
   }
 
-  // Fetch Current User
-  const currentUser = useCurrentUser();
+  // Useeffects
+  useEffect(() => {
+    if (!currentUser) return;
+    const func = async () => {
+      const task_list = await getAchievements({ userId: currentUser as string, date: format(currentDate, "yyyy-MM-dd") })
+      setDaily_task_card_list(task_list.data)
+    }
+    func()
+  }, [currentUser, currentDate])
+
+  // console.log(daily_task_card_list)
+  // console.log(currentUser)
+  // console.log(format(currentDate, "yyyy-MM-dd"))
+
 
   return (
     <div className='w-full'>
@@ -161,6 +186,7 @@ const Page = () => {
               </label>
               <input
                 type="text"
+                required
                 {...registerCreating("target")}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -170,6 +196,7 @@ const Page = () => {
               </label>
               <textarea
                 {...registerCreating("tasks")}
+                required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                 rows={4}
               ></textarea>
@@ -240,24 +267,37 @@ const Page = () => {
       )}
 
       {/* Form to Add Achievement */}
-      <div className={`w-[80%] mx-auto ${isAddingAchievement ? 'block' : 'hidden'}`}>
-        <form onSubmit={handleAchievementSubmit(onAchievementSubmit)} className="flex flex-col gap-4 p-6 bg-white rounded-lg w-full shadow-md">
-          <label htmlFor="target" className="text-left font-medium text-gray-700">
+      <div
+        className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+    w-11/12 sm:w-5/6 md:w-3/4 lg:w-2/3 xl:w-2/3 max-h-[90vh] overflow-y-auto shadow-2xl
+    ${isAddingAchievement && !isCreating ? 'block' : 'hidden'}`}
+      >
+        <form
+          onSubmit={handleAchievementSubmit(onAchievementSubmit)}
+          className="flex flex-col gap-4 p-6 bg-white rounded-lg w-full shadow-md"
+        >
+          <label
+            htmlFor="target"
+            className="text-left font-medium text-gray-700"
+          >
             Yeah, let’s gooo! 🎉😎 Sooo... what epic stuff did you crush today? 🏆✨
           </label>
+
           <textarea
             id="target"
             rows={4}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             {...registerAchievement("target")}
           ></textarea>
+
           <input
             type="submit"
-            value={`${isSubmittingAchievement ? 'Submitting......' : 'Submit'}`}
+            value={isSubmittingAchievement ? 'Submitting......' : 'Submit'}
             className="bg-blue-500 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-600 transition"
           />
         </form>
       </div>
+
     </div>
   )
 }

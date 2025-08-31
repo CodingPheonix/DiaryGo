@@ -25,6 +25,7 @@ const page = () => {
   console.log(event_list);
 
   useEffect(() => {
+    if(!currentUser) return;
     const fetchEvents = async () => {
       const events = await GetCalendarEvents({ userId: currentUser as string });
       console.log(events);

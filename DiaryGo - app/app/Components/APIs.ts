@@ -72,6 +72,8 @@ export async function sendMessage(message: string) {
             throw new Error("Failed to connect to API");
         }
 
+        console.log(response)
+
         const result = await response.json();
         const targetMessages = result.responses[result.responses.length - 1];
 
@@ -167,7 +169,7 @@ export async function GetCalendarEvents(params: { userId: string }) {
     }
 }
 
-export async function UploadAchievement(params: { userId: string, task: string, date: string }) {
+export async function UploadAchievement(params: { userId: string, task: string, date: string, time: string }) {
     try {
         const response = await fetch(`/api/achievement`, {
             method: "POST",
@@ -186,5 +188,19 @@ export async function UploadAchievement(params: { userId: string, task: string, 
         console.error("Error in UploadAchievement:", error);
         throw error;
     }
+}
 
+export async function getAchievements(params: { userId: string, date: string }) {
+
+    console.log("userId", params.userId, "date", params.date)
+    try {
+        const response = await fetch(`/api/achievement?userId=${params.userId}&date=${params.date}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        })
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error("Error in getAchievement:", error);
+    }
 }

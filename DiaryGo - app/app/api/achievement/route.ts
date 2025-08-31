@@ -6,16 +6,21 @@ await connect_to_mongo()
 
 export async function POST(request: NextRequest) {
     try {
-        const { task, userId, date } = await request.json();
+        const { task, userId, date, time } = await request.json();
+        console.log("task: ", task)
+        console.log("userId: ", userId)
+        console.log("date: ", date)
+        console.log("time: ", time)
 
-        if (!task || !userId || !date) {
-            return NextResponse.json({ message: "Task or userId or date not found!" }, { status: 404 })
+        if (!task || !userId || !date || !time) {
+            return NextResponse.json({ message: "Task or userId or date or time not found!" }, { status: 404 })
         }
 
         const new_task = new achievement({
             task: task,
             userId: userId,
-            date: date
+            date: date,
+            time: time
         })
         await new_task.save();
         return NextResponse.json({ message: "Task saved!", data: new_task }, { status: 200 })
