@@ -2,7 +2,6 @@
 import { useState } from "react"
 import Sign_up from "./Components/Sign_up"
 import Log_in from "./Components/Log_in"
-import { redirect } from "next/navigation"
 
 export default function Home() {
 

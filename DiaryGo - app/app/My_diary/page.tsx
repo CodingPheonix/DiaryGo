@@ -1,18 +1,18 @@
 'use client'
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Diary_task_card from '../Components/Dairy_task_card';
 import { format, addDays, subDays, isAfter } from "date-fns";
 import { MdOutlineAdd } from "react-icons/md";
 import { useForm, SubmitHandler } from "react-hook-form"
 import { ToastContainer, toast } from 'react-toastify';
 import { getAchievements, sendMessage, UploadAchievement, uploadNewTask, UploadToCalendar } from '../Components/APIs';
-import { useCurrentUser } from '../Components/CurrentUser';
+import { CurrentUser } from '../Components/CurrentUser';
 
 const Page = () => {
   const today = new Date();
 
   // Fetch Current User
-  const currentUser = useCurrentUser();
+  const currentUser = CurrentUser();
 
   // Type Declarations
   type OnAchievementSubmit = {
@@ -44,10 +44,10 @@ const Page = () => {
   } = useForm<OnAchievementSubmit>();
 
   // State List
-  const [isCreating, setIsCreating] = useState<Boolean>(false)
-  const [isCreatingTarget, setIsCreatingTarget] = useState<Boolean>(false)
-  const [isAddingAchievement, setIsAddingAchievement] = useState<Boolean>(false)
-  const [isSubmittingAchievement, setIsSubmittingAchievement] = useState<Boolean>(false)
+  const [isCreating, setIsCreating] = useState<boolean>(false)
+  const [isCreatingTarget, setIsCreatingTarget] = useState<boolean>(false)
+  const [isAddingAchievement, setIsAddingAchievement] = useState<boolean>(false)
+  const [isSubmittingAchievement, setIsSubmittingAchievement] = useState<boolean>(false)
   const [currentDate, setCurrentDate] = useState<Date>(today);
   const [daily_task_card_list, setDaily_task_card_list] = useState<TaskCard[]>([])
 

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { fetchSession } from "../Utilities/actions/auth";
 
 // Custom hook
-export function useCurrentUser() {
+export function CurrentUser() {
   const [currentUser, setCurrentUser] = useState<string | null>(null);
 
   const fetchCurrentUser = useCallback(async () => {

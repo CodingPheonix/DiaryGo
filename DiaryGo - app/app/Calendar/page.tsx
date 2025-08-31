@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
-import { useCurrentUser } from '../Components/CurrentUser'
+import { CurrentUser } from '../Components/CurrentUser'
 import { GetCalendarEvents } from '../Components/APIs'
 
 /*
@@ -19,7 +19,7 @@ const page = () => {
     date: string
   }
 
-  const currentUser = useCurrentUser();
+  const currentUser = CurrentUser();
 
   const [event_list, setEvent_list] = useState<event[]>([])
   console.log(event_list);

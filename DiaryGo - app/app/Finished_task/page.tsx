@@ -1,8 +1,8 @@
 "use client"
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import Ongoing_task_card from '../Components/Ongoing_task_card'
 import Completed_task_card from '../Components/Completed_task_card'
-import { useCurrentUser } from '../Components/CurrentUser'
+import { CurrentUser } from '../Components/CurrentUser'
 import { fetchAllTargets, modifyIsCompletedStatus } from '../Components/APIs'
 
 const page = () => {
@@ -20,7 +20,7 @@ const page = () => {
   const [completed_Task_List, setCompleted_Task_List] = useState<Task[]>([])
 
   // Fetch Current User
-  const currentUser = useCurrentUser();
+  const currentUser = CurrentUser();
 
   useEffect(() => {
     const func = async () => {
@@ -28,8 +28,8 @@ const page = () => {
 
       console.log("fetch_all_targets : ", fetch_all_targets);
 
-      let ongoingTasks: Task[] = [];
-      let completedTasks: Task[] = [];
+      const ongoingTasks: Task[] = [];
+      const completedTasks: Task[] = [];
 
       if (Array.isArray(fetch_all_targets.data)) {
         fetch_all_targets.data.forEach(async (target: Task) => {
