@@ -12,7 +12,7 @@ import { GetCalendarEvents } from '../Components/APIs'
   - Targets achieved
 */
 
-const page = () => {
+const Page = () => {
 
   type event = {
     title: string,
@@ -29,7 +29,7 @@ const page = () => {
     const fetchEvents = async () => {
       const events = await GetCalendarEvents({ userId: currentUser as string });
       console.log(events);
-      Array.isArray(events.data) && events.data.map((event: { event: string; date: string | any[] }, i: any) => {
+      Array.isArray(events.data) && events.data.map((event: { event: string; date: string }) => {
         setEvent_list((prev) => [
           ...prev,
           {
@@ -56,4 +56,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page

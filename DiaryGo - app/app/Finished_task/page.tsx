@@ -5,7 +5,7 @@ import Completed_task_card from '../Components/Completed_task_card'
 import { CurrentUser } from '../Components/CurrentUser'
 import { fetchAllTargets, modifyIsCompletedStatus } from '../Components/APIs'
 
-const page = () => {
+const Page = () => {
 
   type Task = {
     userId: string;
@@ -94,4 +94,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page
