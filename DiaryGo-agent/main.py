@@ -9,7 +9,7 @@ from ai_agent.graph import stream_graph_updates
 
 load_dotenv()
 
-origins=os.getenv('ORIGIN').split(',')
+origins=os.getenv('ORIGIN', '').split(',')
 print(origins)
 
 app = FastAPI()

@@ -69,35 +69,28 @@ const Page = () => {
     const curr_time = new Date().toString().trim().slice(15, 21)
 
     const prompt = `
-      I want to update the progress of my tasks. Here are some documents:
-      Achievement: ${data.target},
-      userId: ${currentUser}
+      I am ${currentUser as string}. i want to update my progress. ${data.target}.
     `
-    const response = await sendMessage(prompt)   // Calculate the progress and other tasks through Agent
+    await sendMessage(prompt)
 
-    if (response) {
-      // Upload achievement to current date and time
-      await UploadAchievement({
-        userId: currentUser as string,
-        task: data.target,
-        date: format(new Date(), "yyyy-MM-dd").slice(0, 10),
-        time: curr_time
-      })
+    // Upload achievement to current date and time
+    await UploadAchievement({
+      userId: currentUser as string,
+      task: data.target,
+      date: format(new Date(), "yyyy-MM-dd").slice(0, 10),
+      time: curr_time
+    })
 
-      await UploadToCalendar({    // add event to calendar
-        userId: currentUser as string,
-        date: format(new Date(), "yyyy-MM-dd").slice(0, 10),
-        event: data.target
-      });
+    await UploadToCalendar({    // add event to calendar
+      userId: currentUser as string,
+      date: format(new Date(), "yyyy-MM-dd").slice(0, 10),
+      event: data.target
+    });
 
-      setDaily_task_card_list((prev) => [...prev, { task: data.target, time: curr_time }])
-      setIsSubmittingAchievement(false)
-      setIsAddingAchievement(false)
-      toast("Yay! New achievement added")
-      resetAchievement()
-    } else {
-      toast.error("Failed to add achievement")
-    }
+    setDaily_task_card_list((prev) => [...prev, { task: data.target, time: curr_time }])
+    setIsSubmittingAchievement(false)
+    setIsAddingAchievement(false)
+    resetAchievement()
   }
 
   // Handle Creating Target Form
@@ -105,17 +98,10 @@ const Page = () => {
     setIsCreatingTarget(true)
 
     const prompt = `
-      you are given a text containing a list of tasks- make me a list of tasks using them - the text is: ${data.tasks}
-      I need an array of tasks. like ["task1", "task2", "task3"] made of my given input.
+      I am ${currentUser as string}. I want to create a new target - ${data.target}. ${data.tasks}
     `
 
-    const task_list = await sendMessage(prompt)   // get the list of tasks
-
-    const response = await uploadNewTask({    // upload the target
-      userId: currentUser as string,
-      target: data.target,
-      task_list: task_list
-    })
+    await sendMessage(prompt)
 
     const date = new Date();
     const formattedDate = format(date, "yyyy-MM-dd").slice(0, 10);    // get the current date
@@ -125,12 +111,9 @@ const Page = () => {
       date: formattedDate,
       event: data.target
     });
-
-    if (response?.status === 200) {   // perform actions on success
-      toast('Yay! New Target Added!')
-      setIsCreatingTarget(false)
-      resetCreating()
-    }
+    
+    setIsCreatingTarget(false)
+    resetCreating()
   }
 
   // Useeffects
@@ -138,7 +121,7 @@ const Page = () => {
     if (!currentUser) return;
     const func = async () => {
       const task_list = await getAchievements({ userId: currentUser as string, date: format(currentDate, "yyyy-MM-dd") })
-      setDaily_task_card_list(task_list.data)
+      task_list.data && setDaily_task_card_list(task_list.data)
     }
     func()
   }, [currentUser, currentDate])

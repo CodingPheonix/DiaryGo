@@ -10,7 +10,9 @@ from .tools import get_targets, update_targets
 
 load_dotenv()
 
-os.environ["GOOGLE_API_KEY"] = os.getenv("GEMINI_API_KEY")
+gemini_key = os.getenv("GEMINI_API_KEY")
+if gemini_key:
+    os.environ["GOOGLE_API_KEY"] = gemini_key
 
 llm = init_chat_model("google_genai:gemini-2.0-flash")
 tool_mapping = {"get_targets": get_targets, "update_targets": update_targets}
@@ -238,6 +240,7 @@ def database_manager(state: State):
     llm_output = llm_with_tools.invoke(prompt)
     tool_message = None
     tool_used = ""
+    tool_result = None
 
     # process any tool calls
     for tool_call in getattr(llm_output, "tool_calls", []):
