@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
         const calendars = await calendar.find({ userId });
 
         if (!calendars || calendars.length === 0) {
-            return NextResponse.json({ message: "No calendars found" }, { status: 404 });
+            return NextResponse.json({ message: "No calendars found", data: [] }, { status: 200 });
         }
 
         return NextResponse.json({ message: "Calendars fetched successfully", data: calendars }, { status: 200 });

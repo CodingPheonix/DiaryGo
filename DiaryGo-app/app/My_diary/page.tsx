@@ -50,6 +50,7 @@ const Page = () => {
   const [isSubmittingAchievement, setIsSubmittingAchievement] = useState<boolean>(false)
   const [currentDate, setCurrentDate] = useState<Date>(today);
   const [daily_task_card_list, setDaily_task_card_list] = useState<TaskCard[]>([])
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   // Functions to Handle date (Prev)
   const handlePrev = () => {
@@ -117,6 +118,10 @@ const Page = () => {
   }
 
   // Useeffects
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   useEffect(() => {
     if (!currentUser) return;
     const func = async () => {
@@ -204,7 +209,7 @@ const Page = () => {
 
             {/* Date Display */}
             <span className="text-2xl font-semibold">
-              {format(currentDate, "dd MMMM, yyyy")}
+              {isMounted ? format(currentDate, "dd MMMM, yyyy") : ""}
             </span>
 
             {/* Right Arrow */}

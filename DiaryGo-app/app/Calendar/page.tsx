@@ -22,6 +22,11 @@ const Page = () => {
   const currentUser = CurrentUser();
 
   const [event_list, setEvent_list] = useState<event[]>([])
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   useEffect(() => {
     if (!currentUser) return;
@@ -45,11 +50,13 @@ const Page = () => {
 
   return (
     <div className='w-[90%] mx-auto'>
-      <FullCalendar
-        plugins={[dayGridPlugin]}
-        initialView="dayGridMonth"
-        events={event_list}
-      />
+      {isMounted && (
+        <FullCalendar
+          plugins={[dayGridPlugin]}
+          initialView="dayGridMonth"
+          events={event_list}
+        />
+      )}
     </div>
   )
 }
