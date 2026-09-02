@@ -1,7 +1,7 @@
 "use server"
 import { SignupFormSchema, LoginFormSchema } from "../lib/definitions";
 import bcrypt from "bcryptjs";
-import { createSession, deleteSession, getSession, updateSession } from "../lib/sessions";
+import { createSession, deleteSession, getSession } from "../lib/sessions";
 import { redirect } from "next/navigation";
 import { connect_to_mongo } from "../../api/mongo/connect_to_mongo";
 import { auth } from "../../api/mongo/mongo_schema";

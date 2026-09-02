@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
         }
 
         return NextResponse.json({ message: "Calendars fetched successfully", data: calendars }, { status: 200 });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: "Failed to fetch calendar data" }, { status: 500 });
     }
 }
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
         const newCalendar = new calendar({ userId: userId, date: date, event: event });
         await newCalendar.save();
         return NextResponse.json({ message: "Calendar created successfully", data: newCalendar }, { status: 201 });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: "Failed to add event to calendar" }, { status: 500 });
     }
 }

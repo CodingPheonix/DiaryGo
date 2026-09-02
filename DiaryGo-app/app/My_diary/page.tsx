@@ -4,7 +4,7 @@ import Diary_task_card from '../Components/Dairy_task_card';
 import { format, addDays, subDays, isAfter } from "date-fns";
 import { MdOutlineAdd } from "react-icons/md";
 import { useForm, SubmitHandler } from "react-hook-form"
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import { getAchievements, sendMessage, UploadAchievement, uploadNewTask, UploadToCalendar } from '../Components/APIs';
 import { CurrentUser } from '../Components/CurrentUser';
 
@@ -32,7 +32,6 @@ const Page = () => {
     register: registerCreating,
     handleSubmit: handleCreatingSubmit,
     reset: resetCreating,
-    formState: { errors: creatingErrors },
   } = useForm<OnCreatingTarget>();
 
   // Submit useform for Achievement Submit
@@ -40,7 +39,6 @@ const Page = () => {
     register: registerAchievement,
     handleSubmit: handleAchievementSubmit,
     reset: resetAchievement,
-    formState: { errors: achievementErrors },
   } = useForm<OnAchievementSubmit>();
 
   // State List
@@ -134,7 +132,7 @@ const Page = () => {
     if (!currentUser) return;
     const func = async () => {
       const task_list = await getAchievements({ userId: currentUser as string, date: format(currentDate, "yyyy-MM-dd") })
-      task_list.data && setDaily_task_card_list(task_list.data)
+      if (task_list.data) setDaily_task_card_list(task_list.data);
     }
     func()
   }, [currentUser, currentDate])

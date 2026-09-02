@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
         } else {
             return NextResponse.json({ message: "target user not found" })
         }
-    } catch (error) {
+    } catch {
         return NextResponse.json({ status: 500, message: "Internal Server Error" })
     }
 }

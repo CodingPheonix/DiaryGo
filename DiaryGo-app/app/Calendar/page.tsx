@@ -32,7 +32,7 @@ const Page = () => {
     if (!currentUser) return;
     const fetchEvents = async () => {
       const events = await GetCalendarEvents({ userId: currentUser as string });
-      Array.isArray(events.data) && events.data.map((event: { event: string; date: string }) => {
+      Array.isArray(events.data) && events.data.forEach((event: { event: string; date: string }) => {
         setEvent_list((prev) => [
           ...prev,
           {

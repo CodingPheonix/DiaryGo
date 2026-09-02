@@ -44,7 +44,7 @@ export async function PUT(request: NextRequest) {
         }
 
         return NextResponse.json({ message: "Diary Updated!", data: target_diary }, { status: 200 })
-    } catch (error) {
+    } catch {
         return NextResponse.json({ message: "Internal Server Error!" }, { status: 500 })
     }
 }
@@ -63,7 +63,7 @@ export async function PATCH(request: NextRequest) {
         }
 
         return NextResponse.json({ message: "Diary Updated!", data: target_diary }, { status: 200 })
-    } catch (error) {
+    } catch {
         return NextResponse.json({ message: "Internal Server Error!" }, { status: 500 })
     }
 }
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ message: "Target User has no Diary!" }, { status: 404 })
         }
         return NextResponse.json({ message: "Target diary fetched", data: target_diary }, { status: 200 })
-    } catch (error) {
+    } catch {
         return NextResponse.json({ message: "Internal Server Error!" }, { status: 500 })
     }
 }

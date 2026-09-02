@@ -15,6 +15,7 @@ const llm = new ChatGoogleGenerativeAI({
 
 // Tools
 const getTargetsTool = tool(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async ({ userId }: any) => {
     await connect_to_mongo();
     const all_diaries = await diary.find({ userId: userId });
@@ -36,6 +37,7 @@ const getTargetsTool = tool(
 );
 
 const updateTargetsTool = tool(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async ({ diaries }: any) => {
     await connect_to_mongo();
     const results = [];
@@ -69,6 +71,7 @@ const llmWithTools = llm.bindTools(tools);
 
 // Graph State
 const GraphState = Annotation.Root({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   messages: Annotation<any[]>({
     reducer: (x, y) => x.concat(y),
     default: () => [],
@@ -393,9 +396,11 @@ export async function POST(req: NextRequest) {
     });
 
     for await (const chunk of stream) {
-      for (const [key, value] of Object.entries(chunk)) {
-        if (value.messages && value.messages.length > 0) {
-          const lastMsg = value.messages[value.messages.length - 1];
+      for (const value of Object.values(chunk)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const typedValue = value as any;
+        if (typedValue.messages && typedValue.messages.length > 0) {
+          const lastMsg = typedValue.messages[typedValue.messages.length - 1];
           responseList.push(lastMsg.content);
         }
       }
