@@ -2,7 +2,9 @@ const agentURL = process.env.NEXT_PUBLIC_AGENT_URL;
 
 export async function sendMessage(message: string) {
     try {
-        const response = await fetch(`${agentURL}/agent`, {
+        console.log(agentURL)
+        const fetchUrl = agentURL ? `${agentURL}/agent` : "/api/agent";
+        const response = await fetch(fetchUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ query: message }),
@@ -13,7 +15,18 @@ export async function sendMessage(message: string) {
         }
 
         const result = await response.json();
-        const targetMessages = result.responses[result.responses.length - 1];
+        let targetMessages = result.responses[result.responses.length - 1];
+
+        // Clean up markdown code blocks if present
+        targetMessages = targetMessages.replace(/```(?:json)?/g, "");
+
+        // Extract just the JSON object or array in case there is surrounding text
+        const jsonStart = targetMessages.search(/[\{\[]/);
+        const jsonEnd = targetMessages.search(/[\}\]][^}\]]*$/);
+        
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+            targetMessages = targetMessages.substring(jsonStart, jsonEnd + 1);
+        }
 
         return JSON.parse(targetMessages);
 

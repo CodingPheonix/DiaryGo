@@ -102,7 +102,15 @@ const Page = () => {
       I am ${currentUser as string}. I want to create a new target - ${data.target}. ${data.tasks}
     `
 
-    await sendMessage(prompt)
+    const task_list = await sendMessage(prompt);
+
+    if (task_list && Array.isArray(task_list)) {
+      await uploadNewTask({
+        userId: currentUser as string,
+        target: data.target,
+        task_list: task_list
+      });
+    }
 
     const date = new Date();
     const formattedDate = format(date, "yyyy-MM-dd").slice(0, 10);    // get the current date
